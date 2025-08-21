@@ -1,0 +1,18 @@
+### Contentful Delivery API - Find Parent/Reference Entities
+### Based on: https://www.contentful.com/developers/docs/references/content-delivery-api/
+
+# Your Contentful credentials
+@space_id = nuloos7fnddp
+@environment = dev
+@delivery_token = xxx
+@base_url = https://cdn.contentful.com
+@target_entry_id = 4eVmnGmlsqO18a1Hm18H6H
+
+### 1. Search for entries that link to your code block (using links_to_entry)
+GET {{base_url}}/spaces/{{space_id}}/environments/{{environment}}/entries?links_to_entry={{target_entry_id}}&access_token={{delivery_token}}
+
+### 2. Search for entries that link to your code block with specific content type
+GET {{base_url}}/spaces/{{space_id}}/environments/{{environment}}/entries?links_to_entry={{target_entry_id}}&content_type=YOUR_PARENT_CONTENT_TYPE&access_token={{delivery_token}}
+
+### 3. Get all entries and search for references (less efficient but comprehensive)
+GET {{base_url}}/spaces/{{space_id}}/environments/{{environment}}/entries?include=10&access_token={{delivery_token}}
