@@ -2,7 +2,7 @@
 ### Based on: https://www.contentful.com/developers/docs/references/content-delivery-api/
 
 # Your Contentful credentials
-@space_id = nuloos7fnddp
+@space_id = 3p2fxa94bzao
 @environment = dev
 @delivery_token = xxx
 @base_url = https://cdn.contentful.com
@@ -16,3 +16,6 @@ GET {{base_url}}/spaces/{{space_id}}/environments/{{environment}}/entries?links_
 
 ### 3. Get all entries with full reference resolution (comprehensive but slower)
 GET {{base_url}}/spaces/{{space_id}}/environments/{{environment}}/entries?include=10&access_token={{delivery_token}}
+
+### 4. Get all locales for the space
+GET {{base_url}}/spaces/{{space_id}}/environments/master/locales?access_token={{delivery_token}}
