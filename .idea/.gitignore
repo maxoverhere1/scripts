@@ -1,12 +1,23 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+
 # Editor-based HTTP Client requests
 /httpRequests/
+http-client.cookies
+http-requests-log.http
+
+# IntelliJ IDEA configuration files
+/misc.xml
+/modules.xml
+*.iml
+
 # Environment-dependent path to Maven home directory
 /mavenHomeManager.xml
+
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
-# IDE settings that change frequently
-/misc.xml
+
+# Version control
+/vcs.xml
