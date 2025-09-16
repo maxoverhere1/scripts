@@ -1,0 +1,54 @@
+### Smartling Files API - List Files and Check Status
+### Based on: https://api-reference.smartling.com/#tag/Files
+
+# Your Smartling credentials
+@project_id = 9233d2cb5
+@user_identifier = YOUR_USER_IDENTIFIER
+@user_secret = YOUR_USER_SECRET
+@base_url = https://api.smartling.com
+@auth_url = https://api.smartling.com/auth-api/v2/authenticate
+@access_token = YOUR_ACCESS_TOKEN
+
+### 1. Authenticate to get access token (run this first)
+POST {{auth_url}}
+Content-Type: application/json
+
+{
+  "userIdentifier": "{{user_identifier}}",
+  "userSecret": "{{user_secret}}"
+}
+
+### 2. List all files in the project
+GET {{base_url}}/files-api/v2/projects/{{project_id}}/files/list
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+### 3. List files with filters (optional parameters)
+GET {{base_url}}/files-api/v2/projects/{{project_id}}/files/list?limit=100&offset=0&orderBy=fileUri&orderDirection=asc
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+### 4. Get file status for a specific file
+GET {{base_url}}/files-api/v2/projects/{{project_id}}/file/status?fileUri=YOUR_FILE_URI
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+### 5. Get file status with locale information
+GET {{base_url}}/files-api/v2/projects/{{project_id}}/file/status?fileUri=YOUR_FILE_URI&includeAuthorizedLocales=true
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+### 6. Get detailed file information
+GET {{base_url}}/files-api/v2/projects/{{project_id}}/file?fileUri=YOUR_FILE_URI
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+### 7. List files with specific file types
+GET {{base_url}}/files-api/v2/projects/{{project_id}}/files/list?fileTypes=json,xml,properties
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+### 8. Get project locales
+GET {{base_url}}/projects-api/v2/projects/{{project_id}}
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
