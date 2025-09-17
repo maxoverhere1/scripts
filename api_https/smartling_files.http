@@ -3,19 +3,19 @@
 
 # Your Smartling credentials
 @project_id = 9233d2cb5
-@user_identifier = YOUR_USER_IDENTIFIER
-@user_secret = YOUR_USER_SECRET
+@contentful_entry_id = 5h8yM5dwekaEDWFBZFhgnM
+@file_uri = help_content_strings/launch_now/code-article-8_article_5h8yM5dwekaEDWFBZFhgnM_2025-08-19T07:24:49Z.json
 @base_url = https://api.smartling.com
 @auth_url = https://api.smartling.com/auth-api/v2/authenticate
-@access_token = YOUR_ACCESS_TOKEN
+@access_token = eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJlMDFiZjA0NC05MTI5LTRkMTMtYjJjZC01YjFkMzBhNWMyZmIiLCJleHAiOjE3NTgwODgzMDMsIm5iZiI6MCwiaWF0IjoxNzU4MDg3ODIzLCJpc3MiOiJodHRwczovL3Nzby5zbWFydGxpbmcuY29tL2F1dGgvcmVhbG1zL1NtYXJ0bGluZyIsImF1ZCI6ImF1dGhlbnRpY2F0aW9uLXNlcnZpY2UiLCJzdWIiOiIzOWE1NDQ5NS01N2RiLTQ3ZmItYTY1OS0yNGE4MzNkNWM2YmEiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJhdXRoZW50aWNhdGlvbi1zZXJ2aWNlIiwic2Vzc2lvbl9zdGF0ZSI6IjdhNmU0N2M0LTA0ODItNDBjNS05OGMyLTY3MmVhYzRjZDRkOSIsImNsaWVudF9zZXNzaW9uIjoiMDc2MzU5ZmYtOWQ2YS00YWIwLWJjODktZmFlM2U1NjM4MTEyIiwiYWxsb3dlZC1vcmlnaW5zIjpbXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIlJPTEVfQVBJX1VTRVIiLCJ1c2VyIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsInZpZXctcHJvZmlsZSJdfX0sInVpZCI6IjRmNWJkZTE4OWEzZCIsIm5hbWUiOiJNYXggLSBUZXN0aW5nIFRva2VuIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYXBpVXNlcitwcm9qZWN0KzkyMzNkMmNiNUBzbWFydGxpbmcuY29tIiwidXNlcl9wcmVmaXgiOiJqbG1ic3giLCJnaXZlbl9uYW1lIjoiQVBJIFVzZXIiLCJmYW1pbHlfbmFtZSI6Ik1heCAtIFRlc3RpbmcgVG9rZW4iLCJlbWFpbCI6ImFwaVVzZXIrcHJvamVjdCs5MjMzZDJjYjVAc21hcnRsaW5nLmNvbSJ9.TVya3oE2G7Yj43D_SLXfotqnBpxP_2lliIiLZpqm7iY5Ve7Wm0xKsFTd4zHJgugmZH4yb3o-ETcxRdKq3zkdwsXNBrt_GvxkuJ42i3PbDdUSWLxSvO7YrD4FCHYfQMYfBh2_8JR1fIWhsfGfZyqGoLcPE4loacOgy2XPoEJzTN8
 
-### 1. Authenticate to get access token (run this first)
+### 1. Authenticate with secret
 POST {{auth_url}}
 Content-Type: application/json
 
 {
-  "userIdentifier": "{{user_identifier}}",
-  "userSecret": "{{user_secret}}"
+  "userIdentifier": "jlmbsxcujqjhczoziadywarzxrbwfl",
+  "userSecret": "jitn9vrbbfe3nduq5n8jcdqs7dEs(ch7di4fr14vt64v1vsqnb2sfca"
 }
 
 ### 2. List all files in the project
@@ -23,23 +23,23 @@ GET {{base_url}}/files-api/v2/projects/{{project_id}}/files/list
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
-### 3. List files with filters (optional parameters)
-GET {{base_url}}/files-api/v2/projects/{{project_id}}/files/list?limit=100&offset=0&orderBy=fileUri&orderDirection=asc
+### 3. List files filtered by Contentful entry ID
+GET {{base_url}}/files-api/v2/projects/{{project_id}}/files/list?uriMask={{contentful_entry_id}}
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
 ### 4. Get file status for a specific file
-GET {{base_url}}/files-api/v2/projects/{{project_id}}/file/status?fileUri=YOUR_FILE_URI
+GET {{base_url}}/files-api/v2/projects/{{project_id}}/file/status?fileUri={{file_uri}}
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
 ### 5. Get file status with locale information
-GET {{base_url}}/files-api/v2/projects/{{project_id}}/file/status?fileUri=YOUR_FILE_URI&includeAuthorizedLocales=true
+GET {{base_url}}/files-api/v2/projects/{{project_id}}/file/status?fileUri={{file_uri}}&includeAuthorizedLocales=true
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
 ### 6. Get detailed file information
-GET {{base_url}}/files-api/v2/projects/{{project_id}}/file?fileUri=YOUR_FILE_URI
+GET {{base_url}}/files-api/v2/projects/{{project_id}}/file?fileUri={{file_uri}}
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
