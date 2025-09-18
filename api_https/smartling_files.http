@@ -9,7 +9,7 @@
 #@locale_id = en-AU
 @locale_id = ar-EG
 @auth_url = https://api.smartling.com/auth-api/v2/authenticate
-@access_token = eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJlMzUwYTEzZS1jMTI0LTRhNzctOTdmZC1iZjY3M2JkZmZmMzAiLCJleHAiOjE3NTgwOTExMTYsIm5iZiI6MCwiaWF0IjoxNzU4MDkwNjM2LCJpc3MiOiJodHRwczovL3Nzby5zbWFydGxpbmcuY29tL2F1dGgvcmVhbG1zL1NtYXJ0bGluZyIsImF1ZCI6ImF1dGhlbnRpY2F0aW9uLXNlcnZpY2UiLCJzdWIiOiIzOWE1NDQ5NS01N2RiLTQ3ZmItYTY1OS0yNGE4MzNkNWM2YmEiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJhdXRoZW50aWNhdGlvbi1zZXJ2aWNlIiwic2Vzc2lvbl9zdGF0ZSI6IjU5ZmQ0OWU0LWEzNTEtNDU3MC1hYzhmLWE4NmVhOTFhYmVkYiIsImNsaWVudF9zZXNzaW9uIjoiNTVjYjQyYWYtMzhmZi00OTAzLTkzMzItZWVhMjI2YjUxMTVkIiwiYWxsb3dlZC1vcmlnaW5zIjpbXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIlJPTEVfQVBJX1VTRVIiLCJ1c2VyIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsInZpZXctcHJvZmlsZSJdfX0sInVpZCI6IjRmNWJkZTE4OWEzZCIsIm5hbWUiOiJNYXggLSBUZXN0aW5nIFRva2VuIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYXBpVXNlcitwcm9qZWN0KzkyMzNkMmNiNUBzbWFydGxpbmcuY29tIiwidXNlcl9wcmVmaXgiOiJqbG1ic3giLCJnaXZlbl9uYW1lIjoiQVBJIFVzZXIiLCJmYW1pbHlfbmFtZSI6Ik1heCAtIFRlc3RpbmcgVG9rZW4iLCJlbWFpbCI6ImFwaVVzZXIrcHJvamVjdCs5MjMzZDJjYjVAc21hcnRsaW5nLmNvbSJ9.L1JYeEVu5h5loFD-lLYdtiUh_P_yiqVQCfxWuur9tscY9Pntdse-DVplRBduN91OdqEOlEMfHYYFyrfNC1ZfNxvV5gWmUpnGYXm8A2Z21exlCXWmuDem8OFVgDjAwsXfBotyhe-2SmXiJFMZi4FxxoNNrXZ4vSodBylXYkBQhPc
+@access_token = eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIxNTBlNDRlNy1jZWIxLTQwMTgtOTU4MC0wOGI1ZGVmYTEwYTQiLCJleHAiOjE3NTgxNTY5NzEsIm5iZiI6MCwiaWF0IjoxNzU4MTU2NDkxLCJpc3MiOiJodHRwczovL3Nzby5zbWFydGxpbmcuY29tL2F1dGgvcmVhbG1zL1NtYXJ0bGluZyIsImF1ZCI6ImF1dGhlbnRpY2F0aW9uLXNlcnZpY2UiLCJzdWIiOiIzOWE1NDQ5NS01N2RiLTQ3ZmItYTY1OS0yNGE4MzNkNWM2YmEiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJhdXRoZW50aWNhdGlvbi1zZXJ2aWNlIiwic2Vzc2lvbl9zdGF0ZSI6ImVhMmVjZjQxLTRjZDItNDcxNi04ZTA5LTI5YzFiYjcxZTY3YSIsImNsaWVudF9zZXNzaW9uIjoiOGM5MTkwNmEtMTM1MS00MjVlLTg4NjAtMjE0NDVlNDEwNzVkIiwiYWxsb3dlZC1vcmlnaW5zIjpbXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIlJPTEVfQVBJX1VTRVIiLCJ1c2VyIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsInZpZXctcHJvZmlsZSJdfX0sInVpZCI6IjRmNWJkZTE4OWEzZCIsIm5hbWUiOiJNYXggLSBUZXN0aW5nIFRva2VuIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYXBpVXNlcitwcm9qZWN0KzkyMzNkMmNiNUBzbWFydGxpbmcuY29tIiwidXNlcl9wcmVmaXgiOiJqbG1ic3giLCJnaXZlbl9uYW1lIjoiQVBJIFVzZXIiLCJmYW1pbHlfbmFtZSI6Ik1heCAtIFRlc3RpbmcgVG9rZW4iLCJlbWFpbCI6ImFwaVVzZXIrcHJvamVjdCs5MjMzZDJjYjVAc21hcnRsaW5nLmNvbSJ9.UdBxTkCPG3k0ihQ30gpXsiSP4cPo7RGt3nngRJHGqv0HRaKBYtzUu7F37L_gmCMUzoPdOOWUMYfcfQ9Gx9I3eGm7xhdVyrvFxfF_yGCsT0X_sHmZvhdvxi1w8QGahihYsh_BZCs-B97rftd8X_ZozyTz9KTF2enFAyVVS2MKjjA
 
 ### 1. Authenticate with secret
 POST {{auth_url}}
@@ -35,27 +35,36 @@ GET {{base_url}}/files-api/v2/projects/{{project_id}}/file/status?fileUri={{file
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
-### 5. Get file status for a specific file
+### 5. Search jobs for this file
+POST {{base_url}}/jobs-api/v3/projects/{{project_id}}/jobs/search
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "fileUris": ["{{file_uri}}"]
+}
+
+### 6. Get file status for a specific locale
 GET {{base_url}}/files-api/v2/projects/{{project_id}}/locales/{{locale_id}}/file/status?fileUri={{file_uri}}
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
-### 6. Get file status with locale information
+### 7. Get file status with locale information
 GET {{base_url}}/files-api/v2/projects/{{project_id}}/file/status?fileUri={{file_uri}}&includeAuthorizedLocales=true
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
-### 7. Get detailed file information
+### 8. Get detailed file information
 GET {{base_url}}/files-api/v2/projects/{{project_id}}/file?fileUri={{file_uri}}
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
-### 8. List files with specific file types
+### 9. List files with specific file types
 GET {{base_url}}/files-api/v2/projects/{{project_id}}/files/list?fileTypes=json,xml,properties
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
-### 9. Get project locales
+### 10. Get project locales
 GET {{base_url}}/projects-api/v2/projects/{{project_id}}
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
