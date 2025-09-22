@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+"""
+ContentModelComparator - A class for comparing Contentful content models between spaces.
+
+This module provides functionality to:
+- Compare content types between two Contentful spaces/environments
+- Identify missing content types and fields
+- Detect differences in field definitions
+- Export comparison results to CSV format
+"""
 
 import os
 import csv
@@ -420,34 +429,3 @@ class ContentModelComparator:
         return filename
 
 
-def main():
-    """
-    Main function to run the content model comparison.
-    """
-    comparator = ContentModelComparator()
-    
-    # Fetch and compare models
-    differences = comparator.compare_models()
-    
-    # Export to CSV
-    csv_file = comparator.export_to_csv()
-    
-    # Print summary
-    summary = comparator.get_differences_summary()
-    print("\n📊 Summary:")
-    print(f"  - Missing types in Space 1: {summary['missing_types_space1']}")
-    print(f"  - Missing types in Space 2: {summary['missing_types_space2']}")
-    print(f"  - Types with field differences: {summary['types_with_field_differences']}")
-    print(f"  - Types with definition differences: {summary['types_with_definition_differences']}")
-    print(f"  - Total missing fields in Space 1: {summary['total_missing_fields_space1']}")
-    print(f"  - Total missing fields in Space 2: {summary['total_missing_fields_space2']}")
-    print(f"  - Total field definition differences: {summary['total_definition_differences']}")
-    
-    # Also print to console if there are differences
-    if any([summary['missing_types_space1'], summary['missing_types_space2'], 
-            summary['types_with_field_differences'], summary['types_with_definition_differences']]):
-        print(f"\n📄 Full details exported to: {csv_file}")
-
-
-if __name__ == "__main__":
-    main()
