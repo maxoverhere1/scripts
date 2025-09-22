@@ -317,7 +317,7 @@ class ContentModelComparator:
     
     def export_to_csv(self, filename: str = 'content_model_differences.csv') -> str:
         """
-        Export the differences to a CSV file.
+        Export the differences to a CSV file in the generated directory.
         
         Args:
             filename: Name of the CSV file to create
@@ -325,6 +325,13 @@ class ContentModelComparator:
         Returns:
             Path to the created CSV file
         """
+        # Ensure generated directory exists
+        generated_dir = 'generated'
+        if not os.path.exists(generated_dir):
+            os.makedirs(generated_dir)
+        
+        # Create full path to file in generated directory
+        filepath = os.path.join(generated_dir, filename)
         rows = []
         
         # Add missing content types
@@ -407,25 +414,25 @@ class ContentModelComparator:
         
         # Write to CSV
         if rows:
-            with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
+            with open(filepath, 'w', newline='', encoding='utf-8') as csvfile:
                 fieldnames = ['Difference Type', 'Content Type', 'Field', 'Property', 
                              'Space 1 Value', 'Space 2 Value', 'Space 1 ID', 'Space 2 ID']
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
                 writer.writerows(rows)
             
-            print(f"\n✅ Differences exported to: {filename}")
+            print(f"\n✅ Differences exported to: {filepath}")
             print(f"   Total differences: {len(rows)}")
         else:
             # Create empty CSV with just headers
-            with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
+            with open(filepath, 'w', newline='', encoding='utf-8') as csvfile:
                 fieldnames = ['Difference Type', 'Content Type', 'Field', 'Property', 
                              'Space 1 Value', 'Space 2 Value', 'Space 1 ID', 'Space 2 ID']
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
             
-            print(f"\n✅ No differences found! Empty CSV created: {filename}")
+            print(f"\n✅ No differences found! Empty CSV created: {filepath}")
         
-        return filename
+        return filepath
 
 

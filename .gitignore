@@ -44,3 +44,6 @@ logs/
 secrets.json
 api_keys.txt
 contentful.env
+
+# Generated files and outputs
+content_model/generated/
