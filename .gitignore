@@ -43,3 +43,4 @@ logs/
 .env.staging
 secrets.json
 api_keys.txt
+contentful.env
