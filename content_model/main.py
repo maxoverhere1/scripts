@@ -28,9 +28,9 @@ def main():
 
         comparator = ContentModelComparator(model1, model2, reader1.space_id, reader2.space_id)
 
-        differences = comparator.compare_models()
-        comparator.export_to_csv(differences)
-        comparator.print_summary(differences)
+        # differences = comparator.compare_models()
+        # comparator.export_to_csv(differences)
+        # comparator.print_summary(differences)
 
     except Exception as e:
         print(f"\n❌ Error during comparison: {str(e)}")

@@ -32,7 +32,7 @@ class ContentfulModelReader:
             
             print(f"✅ Fetched {len(content_types)} content types from {self.space_id}/{self.environment_id}")
             
-            self._auto_save_model(content_types)
+            self.save_model(content_types)
             
             return content_types
             
@@ -40,7 +40,7 @@ class ContentfulModelReader:
             print(f"❌ Error fetching content model from {self.space_id}/{self.environment_id}: {str(e)}")
             raise
     
-    def _auto_save_model(self, model: List[Any]) -> str:
+    def save_model(self, model: List[Any]) -> str:
         generated_dir = 'generated'
         if not os.path.exists(generated_dir):
             os.makedirs(generated_dir)
@@ -50,8 +50,7 @@ class ContentfulModelReader:
         
         raw_data = []
         for content_type in model:
-            if hasattr(content_type, 'raw'):
-                raw_data.append(content_type.raw)
+            raw_data.append(content_type.raw)
         
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(raw_data, f, indent=2, ensure_ascii=False)
