@@ -8,7 +8,6 @@ This module provides functionality to:
 - Handle authentication and error management
 """
 
-import contentful_management
 from contentful_management import ContentType, Space, Client
 import os
 import json
@@ -52,6 +51,8 @@ class ContentfulModelReader:
         raw_data: List[Dict[str, Any]] = []
         for content_type in model:
             raw_data.append(content_type.raw)
+
+        raw_data.sort(key=lambda ct: ct.get('name'))
 
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(raw_data, f, indent=2, ensure_ascii=False)

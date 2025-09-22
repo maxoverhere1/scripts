@@ -7,8 +7,9 @@ This script orchestrates the comparison process by:
 4. Displaying summary statistics
 """
 
-from content_model_comparator import ContentModelComparator
-from content_model_reader import ContentfulModelReader
+from typing import List
+from content_model_reader import ContentfulModelReader, ContentType
+from diff_page_builder import DiffPageBuilder
 
 
 def main():
@@ -21,16 +22,15 @@ def main():
         reader2 = ContentfulModelReader('CONTENTFUL_SPACE_ID_2', 'CONTENTFUL_ENVIRONMENT_ID_2')
         
         print(f"Space 1: {reader1.space_id} / {reader1.environment_id}")
-        model1 = reader1.fetch_content_model()
+        model1: List[ContentType] = reader1.fetch_content_model()
         
         print(f"Space 2: {reader2.space_id} / {reader2.environment_id}")
-        model2 = reader2.fetch_content_model()
+        model2: List[ContentType] = reader2.fetch_content_model()
 
-        comparator = ContentModelComparator(model1, model2, reader1.space_id, reader2.space_id)
-
-        # differences = comparator.compare_models()
-        # comparator.export_to_csv(differences)
-        # comparator.print_summary(differences)
+        # Generate HTML diff page
+        diff_builder = DiffPageBuilder(model1, model2, reader1.space_id, reader2.space_id)
+        html_file = diff_builder.create_html_diff()
+        print(f"\n🎉 HTML diff page created: {html_file}")
 
     except Exception as e:
         print(f"\n❌ Error during comparison: {str(e)}")
