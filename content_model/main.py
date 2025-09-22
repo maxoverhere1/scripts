@@ -8,6 +8,7 @@ This script orchestrates the comparison process by:
 """
 
 from content_model_comparator import ContentModelComparator
+from content_model_reader import ContentfulModelReader
 
 
 def main():
@@ -15,31 +16,21 @@ def main():
     print("=" * 50)
     
     try:
-        comparator = ContentModelComparator()
+        print("\n=== Fetching content models ===")
+        reader1 = ContentfulModelReader('CONTENTFUL_SPACE_ID', 'CONTENTFUL_ENVIRONMENT_ID')
+        reader2 = ContentfulModelReader('CONTENTFUL_SPACE_ID_2', 'CONTENTFUL_ENVIRONMENT_ID_2')
         
-        print("\n📊 Running comparison...")
+        print(f"Space 1: {reader1.space_id} / {reader1.environment_id}")
+        model1 = reader1.fetch_content_model()
+        
+        print(f"Space 2: {reader2.space_id} / {reader2.environment_id}")
+        model2 = reader2.fetch_content_model()
+
+        comparator = ContentModelComparator(model1, model2, reader1.space_id, reader2.space_id)
+        
         differences = comparator.compare_models()
-        
-        print("\n💾 Exporting results...")
         csv_file = comparator.export_to_csv()
-        
-        summary = comparator.get_differences_summary()
-        print("\n📈 Comparison Summary:")
-        print("=" * 30)
-        print(f"  Missing types in Space 1: {summary['missing_types_space1']}")
-        print(f"  Missing types in Space 2: {summary['missing_types_space2']}")
-        print(f"  Types with field differences: {summary['types_with_field_differences']}")
-        print(f"  Types with definition differences: {summary['types_with_definition_differences']}")
-        print(f"  Total missing fields in Space 1: {summary['total_missing_fields_space1']}")
-        print(f"  Total missing fields in Space 2: {summary['total_missing_fields_space2']}")
-        print(f"  Total field definition differences: {summary['total_definition_differences']}")
-        
-        total_differences = sum([
-            summary['missing_types_space1'], 
-            summary['missing_types_space2'],
-            summary['types_with_field_differences'], 
-            summary['types_with_definition_differences']
-        ])
+        total_differences = comparator.print_summary()
         
         if total_differences > 0:
             print(f"\n📄 Detailed report exported to: {csv_file}")

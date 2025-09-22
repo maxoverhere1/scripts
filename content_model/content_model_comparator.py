@@ -19,56 +19,16 @@ from content_model_reader import ContentfulModelReader
 
 class ContentModelComparator:
 
-    def __init__(self):
-        load_dotenv('.contentful.env')
-        self.reader1 = ContentfulModelReader(
-            space_id=os.getenv('CONTENTFUL_SPACE_ID'),
-            environment_id=os.getenv('CONTENTFUL_ENVIRONMENT_ID'),
-            management_token=os.getenv('CONTENTFUL_MANAGEMENT_TOKEN')
-        )
-        self.reader2 = ContentfulModelReader(
-            space_id=os.getenv('CONTENTFUL_SPACE_ID_2'),
-            environment_id=os.getenv('CONTENTFUL_ENVIRONMENT_ID_2'),
-            management_token=os.getenv('CONTENTFUL_MANAGEMENT_TOKEN')
-        )
-        
-        self.model1 = None
-        self.model2 = None
+    def __init__(self, model1: List[Any], model2: List[Any], space1_id: str, space2_id: str):
+        self.model1 = model1
+        self.model2 = model2
+        self.space1_id = space1_id
+        self.space2_id = space2_id
         self.differences = {
             'missing_types': {'space1': [], 'space2': []},
             'field_differences': {},
             'definition_differences': {}
         }
-    
-    def fetch_models(self) -> None:
-        print("\n=== Fetching content models ===")
-        print(f"Space 1: {self.reader1.space_id} / {self.reader1.environment_id}")
-        self.model1 = self.reader1.fetch_content_model()
-        
-        print(f"Space 2: {self.reader2.space_id} / {self.reader2.environment_id}")
-        self.model2 = self.reader2.fetch_content_model()
-        
-        self._save_raw_models()
-    
-    def _save_raw_models(self) -> None:
-        if not self.model1 or not self.model2:
-            return
-        
-        generated_dir = 'generated'
-        if not os.path.exists(generated_dir):
-            os.makedirs(generated_dir)
-
-        model1_filename = f"content_model_1_{self.reader1.space_id}.json"
-        model1_path = os.path.join(generated_dir, model1_filename)
-        with open(model1_path, 'w', encoding='utf-8') as f:
-            json.dump(self.model1, f, indent=2, ensure_ascii=False)
-        
-        model2_filename = f"content_model_2_{self.reader2.space_id}.json"
-        model2_path = os.path.join(generated_dir, model2_filename)
-        with open(model2_path, 'w', encoding='utf-8') as f:
-            json.dump(self.model2, f, indent=2, ensure_ascii=False)
-        
-        print(f"Raw content models saved: {model1_path} and {model2_path}")
     
     def _serialize_validation(self, validation) -> Dict[str, Any]:
         if hasattr(validation, 'raw'):
@@ -131,9 +91,7 @@ class ContentModelComparator:
         return definition
     
     def compare_models(self) -> Dict[str, Any]:
-        if not self.model1 or not self.model2:
-            self.fetch_models()
-        
+        print("\n📊 Running comparison...")
         print("\n=== Comparing content models ===")
         types1 = {ct.id: ct for ct in self.model1}
         types2 = {ct.id: ct for ct in self.model2}
@@ -204,13 +162,13 @@ class ContentModelComparator:
         has_differences = False
         if self.differences['missing_types']['space1']:
             has_differences = True
-            print(f"\n📦 Content Types missing in Space 1 ({self.reader1.space_id}):")
+            print(f"\n📦 Content Types missing in Space 1 ({self.space1_id}):")
             for ct in self.differences['missing_types']['space1']:
                 print(f"  - {ct}")
         
         if self.differences['missing_types']['space2']:
             has_differences = True
-            print(f"\n📦 Content Types missing in Space 2 ({self.reader2.space_id}):")
+            print(f"\n📦 Content Types missing in Space 2 ({self.space2_id}):")
             for ct in self.differences['missing_types']['space2']:
                 print(f"  - {ct}")
         
@@ -279,7 +237,29 @@ class ContentModelComparator:
         
         return summary
     
+    def print_summary(self):
+        summary = self.get_differences_summary()
+        print("\n📈 Comparison Summary:")
+        print("=" * 30)
+        print(f"  Missing types in Space 1: {summary['missing_types_space1']}")
+        print(f"  Missing types in Space 2: {summary['missing_types_space2']}")
+        print(f"  Types with field differences: {summary['types_with_field_differences']}")
+        print(f"  Types with definition differences: {summary['types_with_definition_differences']}")
+        print(f"  Total missing fields in Space 1: {summary['total_missing_fields_space1']}")
+        print(f"  Total missing fields in Space 2: {summary['total_missing_fields_space2']}")
+        print(f"  Total field definition differences: {summary['total_definition_differences']}")
+        
+        total_differences = sum([
+            summary['missing_types_space1'], 
+            summary['missing_types_space2'],
+            summary['types_with_field_differences'], 
+            summary['types_with_definition_differences']
+        ])
+        
+        return total_differences
+    
     def export_to_csv(self, filename: str = 'content_model_differences.csv') -> str:
+        print("\n💾 Exporting results...")
         generated_dir = 'generated'
         if not os.path.exists(generated_dir):
             os.makedirs(generated_dir)
@@ -295,8 +275,8 @@ class ContentModelComparator:
                 'Property': '',
                 'Space 1 Value': 'Missing',
                 'Space 2 Value': 'Present',
-                'Space 1 ID': self.reader1.space_id,
-                'Space 2 ID': self.reader2.space_id
+                'Space 1 ID': self.space1_id,
+                'Space 2 ID': self.space2_id
             })
         
         for ct in self.differences['missing_types']['space2']:
@@ -307,8 +287,8 @@ class ContentModelComparator:
                 'Property': '',
                 'Space 1 Value': 'Present',
                 'Space 2 Value': 'Missing',
-                'Space 1 ID': self.reader1.space_id,
-                'Space 2 ID': self.reader2.space_id
+                'Space 1 ID': self.space1_id,
+                'Space 2 ID': self.space2_id
             })
         
         for type_id, field_diffs in self.differences['field_differences'].items():
@@ -320,8 +300,8 @@ class ContentModelComparator:
                     'Property': '',
                     'Space 1 Value': 'Missing',
                     'Space 2 Value': 'Present',
-                    'Space 1 ID': self.reader1.space_id,
-                    'Space 2 ID': self.reader2.space_id
+                    'Space 1 ID': self.space1_id,
+                    'Space 2 ID': self.space2_id
                 })
             
             for field in field_diffs['missing_in_space2']:
@@ -332,8 +312,8 @@ class ContentModelComparator:
                     'Property': '',
                     'Space 1 Value': 'Present',
                     'Space 2 Value': 'Missing',
-                    'Space 1 ID': self.reader1.space_id,
-                    'Space 2 ID': self.reader2.space_id
+                    'Space 1 ID': self.space1_id,
+                    'Space 2 ID': self.space2_id
                 })
         
         for type_id, fields in self.differences['definition_differences'].items():
@@ -356,8 +336,8 @@ class ContentModelComparator:
                             'Property': key,
                             'Space 1 Value': val1_str,
                             'Space 2 Value': val2_str,
-                            'Space 1 ID': self.reader1.space_id,
-                            'Space 2 ID': self.reader2.space_id
+                            'Space 1 ID': self.space1_id,
+                            'Space 2 ID': self.space2_id
                         })
         
         if rows:
