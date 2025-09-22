@@ -27,20 +27,11 @@ def main():
         model2 = reader2.fetch_content_model()
 
         comparator = ContentModelComparator(model1, model2, reader1.space_id, reader2.space_id)
-        
+
         differences = comparator.compare_models()
-        csv_file = comparator.export_to_csv()
-        total_differences = comparator.print_summary()
-        
-        if total_differences > 0:
-            print(f"\n📄 Detailed report exported to: {csv_file}")
-            print("\n🔍 For detailed console output, you can also call:")
-            print("    comparator.print_differences()")
-        else:
-            print("\n✅ Content models are identical!")
-        
-        print("\n🎉 Comparison completed successfully!")
-        
+        comparator.export_to_csv(differences)
+        comparator.print_summary(differences)
+
     except Exception as e:
         print(f"\n❌ Error during comparison: {str(e)}")
         print("\nPlease check:")
