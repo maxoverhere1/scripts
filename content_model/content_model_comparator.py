@@ -27,8 +27,8 @@ class ContentModelComparator:
         Initialize the ContentModelComparator by loading environment variables
         and setting up readers for both spaces.
         """
-        # Load environment variables from contentful.env
-        load_dotenv('contentful.env')
+        # Load environment variables from .contentful.env
+        load_dotenv('.contentful.env')
         
         # Setup first space reader
         self.reader1 = ContentfulModelReader(

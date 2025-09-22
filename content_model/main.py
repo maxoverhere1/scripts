@@ -53,7 +53,7 @@ def main():
     except Exception as e:
         print(f"\n❌ Error during comparison: {str(e)}")
         print("\nPlease check:")
-        print("  1. Your contentful.env file has correct credentials")
+        print("  1. Your .contentful.env file has correct credentials")
         print("  2. Your management token has access to both spaces")
         print("  3. The space IDs and environment IDs are correct")
         return 1
