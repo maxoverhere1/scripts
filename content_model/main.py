@@ -30,7 +30,6 @@ def main():
         # Generate HTML diff page
         diff_builder = DiffPageBuilder(model1, model2, reader1.space_id, reader2.space_id)
         html_file = diff_builder.create_html_diff()
-        print(f"\n🎉 HTML diff page created: {html_file}")
 
     except Exception as e:
         print(f"\n❌ Error during comparison: {str(e)}")
