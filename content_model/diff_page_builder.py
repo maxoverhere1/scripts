@@ -46,20 +46,7 @@ class DiffPageBuilder:
         html_content += self._generate_html_footer()
         
         # Save to file
-        generated_dir = 'generated'
-        if not os.path.exists(generated_dir):
-            os.makedirs(generated_dir)
-            
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"content_model_diff_{timestamp}.html"
-        filepath = os.path.join(generated_dir, filename)
-        
-        with open(filepath, 'w', encoding='utf-8') as f:
-            f.write(html_content)
-            
-        print(f"HTML diff page created: {filepath}")
-        print(f"file://{os.path.abspath(filepath)}")
-        return filepath
+        return self._save_html_file(html_content)
     
     def _generate_summary_section(self, missing_in_space1: Set[str], missing_in_space2: Set[str], common_names: Set[str]) -> str:
         total_types = len(missing_in_space1) + len(missing_in_space2) + len(common_names)
@@ -322,6 +309,23 @@ class DiffPageBuilder:
                 if isinstance(validation_data, dict) and 'linkContentType' in validation_data:
                     link_types.extend(validation_data['linkContentType'])
         return list(set(link_types))  # Remove duplicates
+
+    def _save_html_file(self, html_content: str) -> str:
+        """Save HTML content to a timestamped file and return the file path."""
+        generated_dir = 'generated'
+        if not os.path.exists(generated_dir):
+            os.makedirs(generated_dir)
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"content_model_diff_{timestamp}.html"
+        filepath = os.path.join(generated_dir, filename)
+
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+
+        print(f"HTML diff page created: {filepath}")
+        print(f"file://{os.path.abspath(filepath)}")
+        return filepath
     
     def _format_field_properties(self, field: Any) -> str:
         """Format field properties for display."""
@@ -334,7 +338,7 @@ class DiffPageBuilder:
             html += f'<div class="field-property"><span class="property-name">Validations:</span> <span class="property-value">{len(field.validations)}</span></div>\n'
             
         return html
-    
+
     def _generate_html_footer(self) -> str:
         """Generate HTML footer."""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
