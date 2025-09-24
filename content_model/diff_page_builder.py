@@ -9,89 +9,86 @@ This module provides functionality to:
 - Export results to HTML files
 """
 
-from contentful_management.content_type_field_validation import ContentTypeFieldValidation
-from contentful_management.content_type_field_validation import ContentTypeFieldValidation
 import json
 import os
-from typing import Any
 from datetime import datetime
 from contentful_management import ContentType, ContentTypeField
 from contentful_management.content_type_field_validation import ContentTypeFieldValidation
 
 
 class DiffPageBuilder:
-    
+
     def __init__(self, model1: list[ContentType], model2: list[ContentType], space1_id: str, space2_id: str):
         self.model1: list[ContentType] = model1
         self.model2: list[ContentType] = model2
         self.space1_id: str = space1_id
         self.space2_id: str = space2_id
-    
+
     def create_html_diff(self) -> str:
         print("\n🎨 Building HTML diff page...")
-        
+
         types1: dict[str, ContentType] = {ct.name: ct for ct in self.model1}
         types2: dict[str, ContentType] = {ct.name: ct for ct in self.model2}
-        
+
         names1 = set(types1.keys())
         names2 = set(types2.keys())
-        
+
         missing_in_space2 = names1 - names2
         missing_in_space1 = names2 - names1
         common_names = names1 & names2
-        
+
         html_content = self._generate_html_header()
         html_content += self._generate_summary_section(missing_in_space1, missing_in_space2, common_names)
         html_content += self._generate_content_types_section(types1, types2, missing_in_space1, missing_in_space2, common_names)
         html_content += self._generate_html_footer()
-        
+
         return self._save_html_file(html_content)
-    
+
     def _generate_summary_section(self, missing_in_space1: set[str], missing_in_space2: set[str], common_names: set[str]) -> str:
         total_types = len(missing_in_space1) + len(missing_in_space2) + len(common_names)
-        
+
         html = '<div class="summary">\n'
         html += '<h2>📊 Summary</h2>\n'
         html += f'<div class="summary-item unchanged">Total Content Types: {total_types}</div>\n'
-        
+
         if missing_in_space2:
             html += f'<div class="summary-item removed">Missing in Space 2: {len(missing_in_space2)} types</div>\n'
-        
+
         if missing_in_space1:
             html += f'<div class="summary-item added">Missing in Space 1: {len(missing_in_space1)} types</div>\n'
-            
+
         html += f'<div class="summary-item unchanged">Common Types: {len(common_names)} types</div>\n'
         html += '</div>\n'
-        
+
         return html
-    
-    def _generate_content_types_section(self, types1: dict[str, ContentType], types2: dict[str, ContentType], 
-                                      missing_in_space1: set[str], missing_in_space2: set[str], 
+
+    def _generate_content_types_section(self, types1: dict[str, ContentType], types2: dict[str, ContentType],
+                                      missing_in_space1: set[str], missing_in_space2: set[str],
                                       common_names: set[str]) -> str:
         html = '<h2>📋 Content Types</h2>\n'
-        
+
         # Check if there are any differences at all
         has_missing_types = missing_in_space1 or missing_in_space2
         has_modified_types = any(self._compare_content_types(types1[name], types2[name]) for name in common_names)
-        
+
         # If no differences at all, show celebration message
         if not has_missing_types and not has_modified_types:
             html += '<div class="no-differences">🎉 No differences found! Content models are identical.</div>\n'
             return html
-        
+
         # Show missing types
         html += self._generate_missing_types_section(types1, types2, missing_in_space1, missing_in_space2)
-        
+
         # Show common types (modified and identical)
         html += self._generate_common_types_section(types1, types2, common_names)
-        
+
         return html
-    
-    def _generate_missing_types_section(self, types1: dict[str, ContentType], types2: dict[str, ContentType], 
+
+    def _generate_missing_types_section(self, types1: dict[str, ContentType], types2: dict[str, ContentType],
                                       missing_in_space1: set[str], missing_in_space2: set[str]) -> str:
         """Generate HTML for content types that are missing in one space or the other."""
         html = ''
-        
+
         # Missing in space 2 (only in space 1)
         if missing_in_space2:
             html += '<h3>❌ Missing in Space 2</h3>\n'
@@ -101,7 +98,7 @@ class DiffPageBuilder:
                 html += f'<div class="content-type-header removed">{name}</div>\n'
                 html += f'<div class="content-type-body">{self._format_content_type_details(ct)}</div>\n'
                 html += '</div>\n'
-        
+
         # Missing in space 1 (only in space 2)
         if missing_in_space1:
             html += '<h3>✅ Missing in Space 1</h3>\n'
@@ -111,21 +108,21 @@ class DiffPageBuilder:
                 html += f'<div class="content-type-header added">{name}</div>\n'
                 html += f'<div class="content-type-body">{self._format_content_type_details(ct)}</div>\n'
                 html += '</div>\n'
-                
+
         return html
-    
-    def _generate_common_types_section(self, types1: dict[str, ContentType], types2: dict[str, ContentType], 
+
+    def _generate_common_types_section(self, types1: dict[str, ContentType], types2: dict[str, ContentType],
                                      common_names: set[str]) -> str:
         if not common_names:
             return ''
-            
+
         html = '<h3>🔄 Common Types</h3>\n'
-        
+
         for name in sorted(common_names):
             ct1 = types1[name]
             ct2 = types2[name]
             differences = self._compare_content_types(ct1, ct2)
-            
+
             if differences:
                 # Modified content type
                 diff_summary = self._get_difference_summary(ct1, ct2)
@@ -138,35 +135,35 @@ class DiffPageBuilder:
                 html += f'<div class="content-type">\n'
                 html += f'<div class="content-type-header unchanged">{name} <span class="space-label">(identical)</span></div>\n'
                 html += '</div>\n'
-                
+
         return html
-    
+
     def _get_difference_summary(self, ct1: ContentType, ct2: ContentType) -> str:
         fields1: dict[str, ContentTypeField] = {f.id: f for f in ct1.fields}
         fields2: dict[str, ContentTypeField] = {f.id: f for f in ct2.fields}
-        
+
         field_ids1 = set(fields1.keys())
         field_ids2 = set(fields2.keys())
-        
+
         missing_in_1 = field_ids2 - field_ids1
         missing_in_2 = field_ids1 - field_ids2
         common_fields = field_ids1 & field_ids2
-        
+
         modified_count = 0
         for field_id in common_fields:
             if self._fields_differ(fields1[field_id], fields2[field_id]):
                 modified_count += 1
-        
+
         summary_parts = []
         if missing_in_2:
             summary_parts.append(f"{len(missing_in_2)} missing in Space 2")
         if missing_in_1:
-            summary_parts.append(f"{len(missing_in_1)} missing in Space 1") 
+            summary_parts.append(f"{len(missing_in_1)} missing in Space 1")
         if modified_count:
             summary_parts.append(f"{modified_count} modified")
-            
+
         return ", ".join(summary_parts) if summary_parts else "has differences"
-    
+
     def _format_content_type_details(self, content_type: ContentType) -> str:
         """Format content type details for display."""
         html = f'<div class="field-property"><span class="property-name">ID:</span> <span class="property-value">{content_type.id}</span></div>\n'
@@ -174,34 +171,34 @@ class DiffPageBuilder:
             html += f'<div class="field-property"><span class="property-name">Description:</span> <span class="property-value">{content_type.description}</span></div>\n'
         html += f'<div class="field-property"><span class="property-name">Fields:</span> <span class="property-value">{len(content_type.fields)}</span></div>\n'
         return html
-    
+
     def _compare_content_types(self, ct1: ContentType, ct2: ContentType) -> str:
         """Compare two content types and return HTML showing differences."""
         fields1: dict[str, ContentTypeField] = {f.id: f for f in ct1.fields}
         fields2: dict[str, ContentTypeField] = {f.id: f for f in ct2.fields}
-        
+
         field_ids1 = set(fields1.keys())
         field_ids2 = set(fields2.keys())
 
         missing_in_1 = field_ids2 - field_ids1
         missing_in_2 = field_ids1 - field_ids2
         common_fields = field_ids1 & field_ids2
-        
+
         html = ''
-        
+
         # Show missing fields
         if missing_in_2:
             html += f'<h4>Fields missing in Space 2:</h4>\n'
             for field_id in sorted(missing_in_2):
                 field = fields1[field_id]
                 html += f'<div class="removed" style="margin: 5px 0; padding: 8px;">{field.name} ({field.type})</div>\n'
-        
+
         if missing_in_1:
             html += f'<h4>Fields missing in Space 1:</h4>\n'
             for field_id in sorted(missing_in_1):
                 field = fields2[field_id]
                 html += f'<div class="added" style="margin: 5px 0; padding: 8px;">{field.name} ({field.type})</div>\n'
-        
+
         # Compare common fields
         modified_fields = []
         for field_id in common_fields:
@@ -209,7 +206,7 @@ class DiffPageBuilder:
             field2 = fields2[field_id]
             if self._fields_differ(field1, field2):
                 modified_fields.append((field_id, field1, field2))
-        
+
         if modified_fields:
             html += f'<h4>Modified fields:</h4>\n'
             for field_id, field1, field2 in modified_fields:
@@ -217,153 +214,152 @@ class DiffPageBuilder:
                 html += f'<h4 style="margin: 0 0 10px 0; color: #495057;">Field: {field1.name}</h4>\n'
                 html += self._format_field_differences(field1, field2)
                 html += '</div>\n'
-        
+
         return html
-    
+
     def _fields_differ(self, field1: ContentTypeField, field2: ContentTypeField) -> bool:
         """Check if two fields are different."""
         # Compare key properties
-        if (field1.type != field2.type or 
+        if (field1.type != field2.type or
             field1.required != field2.required or
             field1.localized != field2.localized or
             field1.disabled != field2.disabled or
             field1.omitted != field2.omitted or
             field1.name != field2.name):
             return True
-                
+
         # Compare validations by content, not object reference
         if not self._validations_are_equal(field1.validations, field2.validations):
             return True
-            
+
         # Compare Array field items (for Link validations)
         if hasattr(field1, 'items') and hasattr(field2, 'items'):
             if field1.items != field2.items:
                 return True
-            
+
         return False
-    
-    def _validations_are_equal(self, validations1: list[ContentTypeFieldValidation] | None, 
+
+    def _validations_are_equal(self, validations1: list[ContentTypeFieldValidation] | None,
                               validations2: list[ContentTypeFieldValidation] | None) -> bool:
         """Compare two validation lists by their content, not object references."""
         val1: list[ContentTypeFieldValidation] = validations1 or []
         val2: list[ContentTypeFieldValidation] = validations2 or []
-        
+
         if len(val1) != len(val2):
             return False
-        
+
         if len(val1) == 0:
             return True
-        
-        raw1: list[dict[str, Any]] = [v.raw for v in val1]
-        raw2: list[dict[str, Any]] = [v.raw for v in val2]
-        
-        def normalize_validation(raw_val: dict[str, Any]) -> str:
+
+        raw1: list[dict[str, str | list[str]]] = [v.raw for v in val1]
+        raw2: list[dict[str, str | list[str]]] = [v.raw for v in val2]
+
+        def normalize_validation(raw_val: dict[str, str | list[str]]) -> str:
             return json.dumps(raw_val, sort_keys=True)
-        
+
         normalized1: set[str] = {normalize_validation(v) for v in raw1}
         normalized2: set[str] = {normalize_validation(v) for v in raw2}
         return normalized1 == normalized2
-    
+
     def _format_field_differences(self, field1: ContentTypeField, field2: ContentTypeField) -> str:
         """Format only the meaningful differences between two fields."""
         differences = []
-        
+
         # Basic property differences that actually matter
         if field1.type != field2.type:
             differences.append(f'<div class="field-property"><span class="property-name">Type:</span> <span class="removed">{field1.type}</span> → <span class="added">{field2.type}</span></div>')
-        
+
         if field1.required != field2.required:
             differences.append(f'<div class="field-property"><span class="property-name">Required:</span> <span class="removed">{field1.required}</span> → <span class="added">{field2.required}</span></div>')
-        
+
         if field1.localized != field2.localized:
             differences.append(f'<div class="field-property"><span class="property-name">Localized:</span> <span class="removed">{field1.localized}</span> → <span class="added">{field2.localized}</span></div>')
-        
+
         # Check for meaningful validation differences
         validation_diffs = self._get_validation_differences(field1, field2)
         if validation_diffs:
             differences.extend(validation_diffs)
-            
+
         return '\n'.join(differences) if differences else '<div class="field-property">No meaningful differences detected</div>'
-    
+
     def _get_validation_differences(self, field1: ContentTypeField, field2: ContentTypeField) -> list[str]:
         """Extract meaningful validation differences like enabledMarks and linkContentType."""
         differences = []
-        
+
         # Get validation data for both fields
         val1_validations: list[ContentTypeFieldValidation] = field1.validations or []
         val2_validations: list[ContentTypeFieldValidation] = field2.validations or []
-        
+
         # Extract raw validation data for processing
-        val1_raw: list[dict[str, Any]] = [v.raw for v in val1_validations]
-        val2_raw: list[dict[str, Any]] = [v.raw for v in val2_validations]
-        
+        val1_raw: list[dict[str, str | list[str]]] = [v.raw for v in val1_validations]
+        val2_raw: list[dict[str, str | list[str]]] = [v.raw for v in val2_validations]
+
         # Look for enabledMarks differences
         marks1: list[str] = self._extract_enabled_marks(val1_raw)
         marks2: list[str] = self._extract_enabled_marks(val2_raw)
-        
+
         if marks1 != marks2:
             marks1_str: str = ', '.join(marks1) if marks1 else 'None'
             marks2_str: str = ', '.join(marks2) if marks2 else 'None'
             differences.append(f'<div class="field-property"><span class="property-name">Enabled Marks:</span> <span class="removed">{marks1_str}</span> → <span class="added">{marks2_str}</span></div>')
-        
+
         # Look for linkContentType differences in field validations
         links1: list[str] = self._extract_link_content_types(val1_raw)
         links2: list[str] = self._extract_link_content_types(val2_raw)
-        
+
         if links1 != links2:
             links1_str: str = ', '.join(sorted(links1)) if links1 else 'None'
-            links2_str: str = ', '.join(sorted(links2)) if links2 else 'None' 
+            links2_str: str = ', '.join(sorted(links2)) if links2 else 'None'
             differences.append(f'<div class="field-property"><span class="property-name">Link Content Types:</span> <span class="removed">{links1_str}</span> → <span class="added">{links2_str}</span></div>')
-        
+
         # Check Array field items for linkContentType differences
         if hasattr(field1, 'items') and hasattr(field2, 'items'):
             items_links1: list[str] = self._extract_array_link_content_types(field1.items)
             items_links2: list[str] = self._extract_array_link_content_types(field2.items)
-            
+
             if items_links1 != items_links2:
                 items1_str: str = ', '.join(sorted(items_links1)) if items_links1 else 'None'
                 items2_str: str = ', '.join(sorted(items_links2)) if items_links2 else 'None'
                 differences.append(f'<div class="field-property"><span class="property-name">Array Item Link Types:</span> <span class="removed">{items1_str}</span> → <span class="added">{items2_str}</span></div>')
-        
+
         return differences
-    
-    def _extract_enabled_marks(self, validations: list[dict[str, Any]]) -> list[str]:
+
+    def _extract_enabled_marks(self, validations: list[dict[str, str | list[str]]]) -> list[str]:
         """Extract enabledMarks from validations."""
         for validation in validations:
-            if isinstance(validation, dict) and 'enabledMarks' in validation:
+            if 'enabledMarks' in validation:
                 enabled_marks: list[str] = validation['enabledMarks']
                 return enabled_marks
         return []
-    
-    def _extract_link_content_types(self, validations: list[dict[str, Any]]) -> list[str]:
+
+    def _extract_link_content_types(self, validations: list[dict[str, str | list[str]]]) -> list[str]:
         """Extract linkContentType from validations."""
         link_types: list[str] = []
         for validation in validations:
-            if isinstance(validation, dict):
-                # Look for linkContentType in various places
-                if 'linkContentType' in validation:
-                    content_types: list[str] = validation['linkContentType']
-                    link_types.extend(content_types)
-                # Look for nodes -> embedded-entry-block -> linkContentType
-                if 'nodes' in validation:
-                    nodes: dict[str, Any] = validation['nodes']
-                    if isinstance(nodes, dict) and 'embedded-entry-block' in nodes:
-                        embedded_blocks: list[dict[str, Any]] = nodes['embedded-entry-block']
-                        for block in embedded_blocks:
-                            if isinstance(block, dict) and 'linkContentType' in block:
-                                block_content_types: list[str] = block['linkContentType']
-                                link_types.extend(block_content_types)
+            # Look for linkContentType in various places
+            if 'linkContentType' in validation:
+                content_types: list[str] = validation['linkContentType']
+                link_types.extend(content_types)
+            # Look for nodes -> embedded-entry-block -> linkContentType
+            if 'nodes' in validation:
+                nodes: dict[str, list[dict[str, str | list[str]]]] = validation['nodes']
+                if isinstance(nodes, dict) and 'embedded-entry-block' in nodes:
+                    embedded_blocks: list[dict[str, str | list[str]]] = nodes['embedded-entry-block']
+                    for block in embedded_blocks:
+                        if isinstance(block, dict) and 'linkContentType' in block:
+                            block_content_types: list[str] = block['linkContentType']
+                            link_types.extend(block_content_types)
         return list(set(link_types))  # Remove duplicates
-    
-    def _extract_array_link_content_types(self, items: dict[str, Any]) -> list[str]:
+
+    def _extract_array_link_content_types(self, items: dict[str, str | list[dict[str, str | list[str]]]]) -> list[str]:
         """Extract linkContentType from Array field items."""
         link_types: list[str] = []
-        
+
         # Handle items as either Contentful object or raw dict
         if isinstance(items, dict):
             # Items is raw dictionary from the API
             if 'validations' in items and items['validations']:
-                validations: list[dict[str, Any]] = items['validations']
+                validations: list[dict[str, str | list[str]]] = items['validations']
                 for validation in validations:
                     if isinstance(validation, dict) and 'linkContentType' in validation:
                         content_types: list[str] = validation['linkContentType']
@@ -371,7 +367,7 @@ class DiffPageBuilder:
         elif hasattr(items, 'validations') and items.validations:
             # Items is Contentful object
             for validation in items.validations:
-                validation_data: dict[str, Any] = validation.raw if hasattr(validation, 'raw') else validation
+                validation_data: dict[str, str | list[str]] = validation.raw if hasattr(validation, 'raw') else validation
                 if isinstance(validation_data, dict) and 'linkContentType' in validation_data:
                     content_types: list[str] = validation_data['linkContentType']
                     link_types.extend(content_types)
