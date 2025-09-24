@@ -9,6 +9,8 @@ This module provides functionality to:
 - Export results to HTML files
 """
 
+from contentful_management.content_type_field_validation import ContentTypeFieldValidation
+from contentful_management.content_type_field_validation import ContentTypeFieldValidation
 import json
 import os
 from typing import Any
@@ -229,8 +231,8 @@ class DiffPageBuilder:
             field1.name != field2.name):
             return True
                 
-        # Compare validations
-        if field1.validations != field2.validations:
+        # Compare validations by content, not object reference
+        if not self._validations_are_equal(field1.validations, field2.validations):
             return True
             
         # Compare Array field items (for Link validations)
@@ -239,6 +241,28 @@ class DiffPageBuilder:
                 return True
             
         return False
+    
+    def _validations_are_equal(self, validations1: list[ContentTypeFieldValidation] | None, 
+                              validations2: list[ContentTypeFieldValidation] | None) -> bool:
+        """Compare two validation lists by their content, not object references."""
+        val1: list[ContentTypeFieldValidation] = validations1 or []
+        val2: list[ContentTypeFieldValidation] = validations2 or []
+        
+        if len(val1) != len(val2):
+            return False
+        
+        if len(val1) == 0:
+            return True
+        
+        raw1: list[dict[str, Any]] = [v.raw for v in val1]
+        raw2: list[dict[str, Any]] = [v.raw for v in val2]
+        
+        def normalize_validation(raw_val: dict[str, Any]) -> str:
+            return json.dumps(raw_val, sort_keys=True)
+        
+        normalized1: set[str] = {normalize_validation(v) for v in raw1}
+        normalized2: set[str] = {normalize_validation(v) for v in raw2}
+        return normalized1 == normalized2
     
     def _format_field_differences(self, field1: ContentTypeField, field2: ContentTypeField) -> str:
         """Format only the meaningful differences between two fields."""
