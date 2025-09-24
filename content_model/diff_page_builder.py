@@ -11,9 +11,10 @@ This module provides functionality to:
 
 import json
 import os
-from typing import List, Set, Tuple, Any
+from typing import Any
 from datetime import datetime
 from contentful_management import ContentType, ContentTypeField
+from contentful_management.content_type_field_validation import ContentTypeFieldValidation
 
 
 class DiffPageBuilder:
@@ -264,36 +265,40 @@ class DiffPageBuilder:
         """Extract meaningful validation differences like enabledMarks and linkContentType."""
         differences = []
         
-        # Get validation raw data for both fields
-        val1_raw = [v.raw if hasattr(v, 'raw') else v for v in (field1.validations or [])]
-        val2_raw = [v.raw if hasattr(v, 'raw') else v for v in (field2.validations or [])]
+        # Get validation data for both fields
+        val1_validations: list[ContentTypeFieldValidation] = field1.validations or []
+        val2_validations: list[ContentTypeFieldValidation] = field2.validations or []
+        
+        # Extract raw validation data for processing
+        val1_raw: list[dict[str, Any]] = [v.raw for v in val1_validations]
+        val2_raw: list[dict[str, Any]] = [v.raw for v in val2_validations]
         
         # Look for enabledMarks differences
-        marks1 = self._extract_enabled_marks(val1_raw)
-        marks2 = self._extract_enabled_marks(val2_raw)
+        marks1: list[str] = self._extract_enabled_marks(val1_raw)
+        marks2: list[str] = self._extract_enabled_marks(val2_raw)
         
         if marks1 != marks2:
-            marks1_str = ', '.join(marks1) if marks1 else 'None'
-            marks2_str = ', '.join(marks2) if marks2 else 'None'
+            marks1_str: str = ', '.join(marks1) if marks1 else 'None'
+            marks2_str: str = ', '.join(marks2) if marks2 else 'None'
             differences.append(f'<div class="field-property"><span class="property-name">Enabled Marks:</span> <span class="removed">{marks1_str}</span> → <span class="added">{marks2_str}</span></div>')
         
         # Look for linkContentType differences in field validations
-        links1 = self._extract_link_content_types(val1_raw)
-        links2 = self._extract_link_content_types(val2_raw)
+        links1: list[str] = self._extract_link_content_types(val1_raw)
+        links2: list[str] = self._extract_link_content_types(val2_raw)
         
         if links1 != links2:
-            links1_str = ', '.join(sorted(links1)) if links1 else 'None'
-            links2_str = ', '.join(sorted(links2)) if links2 else 'None' 
+            links1_str: str = ', '.join(sorted(links1)) if links1 else 'None'
+            links2_str: str = ', '.join(sorted(links2)) if links2 else 'None' 
             differences.append(f'<div class="field-property"><span class="property-name">Link Content Types:</span> <span class="removed">{links1_str}</span> → <span class="added">{links2_str}</span></div>')
         
         # Check Array field items for linkContentType differences
         if hasattr(field1, 'items') and hasattr(field2, 'items'):
-            items_links1 = self._extract_array_link_content_types(field1.items)
-            items_links2 = self._extract_array_link_content_types(field2.items)
+            items_links1: list[str] = self._extract_array_link_content_types(field1.items)
+            items_links2: list[str] = self._extract_array_link_content_types(field2.items)
             
             if items_links1 != items_links2:
-                items1_str = ', '.join(sorted(items_links1)) if items_links1 else 'None'
-                items2_str = ', '.join(sorted(items_links2)) if items_links2 else 'None'
+                items1_str: str = ', '.join(sorted(items_links1)) if items_links1 else 'None'
+                items2_str: str = ', '.join(sorted(items_links2)) if items_links2 else 'None'
                 differences.append(f'<div class="field-property"><span class="property-name">Array Item Link Types:</span> <span class="removed">{items1_str}</span> → <span class="added">{items2_str}</span></div>')
         
         return differences
@@ -302,43 +307,50 @@ class DiffPageBuilder:
         """Extract enabledMarks from validations."""
         for validation in validations:
             if isinstance(validation, dict) and 'enabledMarks' in validation:
-                return validation['enabledMarks']
+                enabled_marks: list[str] = validation['enabledMarks']
+                return enabled_marks
         return []
     
     def _extract_link_content_types(self, validations: list[dict[str, Any]]) -> list[str]:
         """Extract linkContentType from validations."""
-        link_types = []
+        link_types: list[str] = []
         for validation in validations:
             if isinstance(validation, dict):
                 # Look for linkContentType in various places
                 if 'linkContentType' in validation:
-                    link_types.extend(validation['linkContentType'])
+                    content_types: list[str] = validation['linkContentType']
+                    link_types.extend(content_types)
                 # Look for nodes -> embedded-entry-block -> linkContentType
                 if 'nodes' in validation:
-                    nodes = validation['nodes']
+                    nodes: dict[str, Any] = validation['nodes']
                     if isinstance(nodes, dict) and 'embedded-entry-block' in nodes:
-                        for block in nodes['embedded-entry-block']:
+                        embedded_blocks: list[dict[str, Any]] = nodes['embedded-entry-block']
+                        for block in embedded_blocks:
                             if isinstance(block, dict) and 'linkContentType' in block:
-                                link_types.extend(block['linkContentType'])
+                                block_content_types: list[str] = block['linkContentType']
+                                link_types.extend(block_content_types)
         return list(set(link_types))  # Remove duplicates
     
     def _extract_array_link_content_types(self, items: dict[str, Any]) -> list[str]:
         """Extract linkContentType from Array field items."""
-        link_types = []
+        link_types: list[str] = []
         
         # Handle items as either Contentful object or raw dict
         if isinstance(items, dict):
             # Items is raw dictionary from the API
             if 'validations' in items and items['validations']:
-                for validation in items['validations']:
+                validations: list[dict[str, Any]] = items['validations']
+                for validation in validations:
                     if isinstance(validation, dict) and 'linkContentType' in validation:
-                        link_types.extend(validation['linkContentType'])
+                        content_types: list[str] = validation['linkContentType']
+                        link_types.extend(content_types)
         elif hasattr(items, 'validations') and items.validations:
             # Items is Contentful object
             for validation in items.validations:
-                validation_data = validation.raw if hasattr(validation, 'raw') else validation
+                validation_data: dict[str, Any] = validation.raw if hasattr(validation, 'raw') else validation
                 if isinstance(validation_data, dict) and 'linkContentType' in validation_data:
-                    link_types.extend(validation_data['linkContentType'])
+                    content_types: list[str] = validation_data['linkContentType']
+                    link_types.extend(content_types)
                     
         return list(set(link_types))  # Remove duplicates
 
