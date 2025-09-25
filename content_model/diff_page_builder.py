@@ -303,14 +303,26 @@ class DiffPageBuilder:
             marks2_str: str = ', '.join(marks2) if marks2 else 'None'
             differences.append(f'<div class="field-property"><span class="property-name">Enabled Marks:</span> <span class="removed">{marks1_str}</span> → <span class="added">{marks2_str}</span></div>')
 
-        # Look for linkContentType differences in field validations
-        links1: list[str] = self._extract_link_content_types(val1_raw)
-        links2: list[str] = self._extract_link_content_types(val2_raw)
+        # Look for linkContentType differences by node type
+        node_types_to_check = ['embedded-entry-block', 'embedded-entry-inline', 'entry-hyperlink']
+        for node_type in node_types_to_check:
+            links1: list[str] = self._extract_link_content_types_by_node(val1_raw, node_type)
+            links2: list[str] = self._extract_link_content_types_by_node(val2_raw, node_type)
 
-        if links1 != links2:
-            links1_str: str = ', '.join(sorted(links1)) if links1 else 'None'
-            links2_str: str = ', '.join(sorted(links2)) if links2 else 'None'
-            differences.append(f'<div class="field-property"><span class="property-name">Link Content Types:</span> <span class="removed">{links1_str}</span> → <span class="added">{links2_str}</span></div>')
+            if links1 != links2:
+                links1_str: str = ', '.join(sorted(links1)) if links1 else 'None'
+                links2_str: str = ', '.join(sorted(links2)) if links2 else 'None'
+                node_type_display = node_type.replace('-', ' ').title().replace(' ', '-')
+                differences.append(f'<div class="field-property"><span class="property-name">{node_type_display} Link Types:</span> <span class="removed">{links1_str}</span> → <span class="added">{links2_str}</span></div>')
+
+        # Look for general linkContentType differences (non-node specific)
+        general_links1: list[str] = self._extract_general_link_content_types(val1_raw)
+        general_links2: list[str] = self._extract_general_link_content_types(val2_raw)
+
+        if general_links1 != general_links2:
+            links1_str: str = ', '.join(sorted(general_links1)) if general_links1 else 'None'
+            links2_str: str = ', '.join(sorted(general_links2)) if general_links2 else 'None'
+            differences.append(f'<div class="field-property"><span class="property-name">General Link Content Types:</span> <span class="removed">{links1_str}</span> → <span class="added">{links2_str}</span></div>')
 
         # Check Array field items for linkContentType differences
         if hasattr(field1, 'items') and hasattr(field2, 'items'):
@@ -322,6 +334,66 @@ class DiffPageBuilder:
                 items2_str: str = ', '.join(sorted(items_links2)) if items_links2 else 'None'
                 differences.append(f'<div class="field-property"><span class="property-name">Array Item Link Types:</span> <span class="removed">{items1_str}</span> → <span class="added">{items2_str}</span></div>')
 
+        # Check for general validation differences (like 'in', 'unique', etc.)
+        general_diffs = self._get_general_validation_differences(val1_raw, val2_raw)
+        if general_diffs:
+            differences.extend(general_diffs)
+
+        return differences
+
+    def _get_general_validation_differences(self, val1_raw: list[dict[str, str | list[str]]], val2_raw: list[dict[str, str | list[str]]]) -> list[str]:
+        """Check for general validation differences like 'in', 'unique', 'size', etc."""
+        differences = []
+        
+        # Check if one has validations and the other doesn't
+        if len(val1_raw) == 0 and len(val2_raw) > 0:
+            differences.append(f'<div class="field-property"><span class="property-name">Validations:</span> <span class="removed">None</span> → <span class="added">{len(val2_raw)} validation(s)</span></div>')
+            return differences
+        elif len(val1_raw) > 0 and len(val2_raw) == 0:
+            differences.append(f'<div class="field-property"><span class="property-name">Validations:</span> <span class="removed">{len(val1_raw)} validation(s)</span> → <span class="added">None</span></div>')
+            return differences
+        elif len(val1_raw) == 0 and len(val2_raw) == 0:
+            return differences
+        
+        # Extract validation types and values for comparison
+        val1_types = set()
+        val2_types = set()
+        val1_details = {}
+        val2_details = {}
+        
+        for validation in val1_raw:
+            for key, value in validation.items():
+                if key not in ['enabledMarks', 'linkContentType', 'nodes', 'enabledNodeTypes']:  # Skip already handled validations
+                    val1_types.add(key)
+                    if key == 'in' and isinstance(value, list):
+                        val1_details[key] = ', '.join(value)
+                    else:
+                        val1_details[key] = str(value)
+        
+        for validation in val2_raw:
+            for key, value in validation.items():
+                if key not in ['enabledMarks', 'linkContentType', 'nodes', 'enabledNodeTypes']:  # Skip already handled validations
+                    val2_types.add(key)
+                    if key == 'in' and isinstance(value, list):
+                        val2_details[key] = ', '.join(value)
+                    else:
+                        val2_details[key] = str(value)
+        
+        # Compare validation types
+        if val1_types != val2_types:
+            missing_in_2 = val1_types - val2_types
+            missing_in_1 = val2_types - val1_types
+            
+            if missing_in_2:
+                differences.append(f'<div class="field-property"><span class="property-name">Validations removed:</span> <span class="removed">{", ".join(missing_in_2)}</span></div>')
+            if missing_in_1:
+                differences.append(f'<div class="field-property"><span class="property-name">Validations added:</span> <span class="added">{", ".join(missing_in_1)}</span></div>')
+        
+        # Compare validation details for common types
+        for validation_type in val1_types & val2_types:
+            if val1_details.get(validation_type) != val2_details.get(validation_type):
+                differences.append(f'<div class="field-property"><span class="property-name">{validation_type}:</span> <span class="removed">{val1_details.get(validation_type, "None")}</span> → <span class="added">{val2_details.get(validation_type, "None")}</span></div>')
+        
         return differences
 
     def _extract_enabled_marks(self, validations: list[dict[str, str | list[str]]]) -> list[str]:
@@ -340,15 +412,41 @@ class DiffPageBuilder:
             if 'linkContentType' in validation:
                 content_types: list[str] = validation['linkContentType']
                 link_types.extend(content_types)
-            # Look for nodes -> embedded-entry-block -> linkContentType
+            # Look for nodes -> [any-node-type] -> linkContentType
             if 'nodes' in validation:
                 nodes: dict[str, list[dict[str, str | list[str]]]] = validation['nodes']
-                if isinstance(nodes, dict) and 'embedded-entry-block' in nodes:
-                    embedded_blocks: list[dict[str, str | list[str]]] = nodes['embedded-entry-block']
-                    for block in embedded_blocks:
-                        if isinstance(block, dict) and 'linkContentType' in block:
-                            block_content_types: list[str] = block['linkContentType']
-                            link_types.extend(block_content_types)
+                if isinstance(nodes, dict):
+                    # Check all node types (embedded-entry-block, embedded-entry-inline, entry-hyperlink, etc.)
+                    for node_type, node_entries in nodes.items():
+                        if isinstance(node_entries, list):
+                            for node_entry in node_entries:
+                                if isinstance(node_entry, dict) and 'linkContentType' in node_entry:
+                                    node_content_types: list[str] = node_entry['linkContentType']
+                                    link_types.extend(node_content_types)
+        return list(set(link_types))  # Remove duplicates
+
+    def _extract_link_content_types_by_node(self, validations: list[dict[str, str | list[str]]], target_node_type: str) -> list[str]:
+        """Extract linkContentType from a specific node type."""
+        link_types: list[str] = []
+        for validation in validations:
+            if 'nodes' in validation:
+                nodes: dict[str, list[dict[str, str | list[str]]]] = validation['nodes']
+                if isinstance(nodes, dict) and target_node_type in nodes:
+                    node_entries: list[dict[str, str | list[str]]] = nodes[target_node_type]
+                    for node_entry in node_entries:
+                        if isinstance(node_entry, dict) and 'linkContentType' in node_entry:
+                            node_content_types: list[str] = node_entry['linkContentType']
+                            link_types.extend(node_content_types)
+        return list(set(link_types))  # Remove duplicates
+
+    def _extract_general_link_content_types(self, validations: list[dict[str, str | list[str]]]) -> list[str]:
+        """Extract linkContentType that are not inside nodes (general field-level linkContentType)."""
+        link_types: list[str] = []
+        for validation in validations:
+            # Look for linkContentType at the top level (not inside nodes)
+            if 'linkContentType' in validation:
+                content_types: list[str] = validation['linkContentType']
+                link_types.extend(content_types)
         return list(set(link_types))  # Remove duplicates
 
     def _extract_array_link_content_types(self, items: dict[str, str | list[dict[str, str | list[str]]]]) -> list[str]:
