@@ -45,7 +45,7 @@ class ContentfulModelReader:
         if not os.path.exists(generated_dir):
             os.makedirs(generated_dir)
 
-        filename: str = f"content_model_{self.space_id}.json"
+        filename: str = f"content_model_{self.space_id}_{self.environment_id}.json"
         filepath: str = os.path.join(generated_dir, filename)
         
         raw_data: List[Dict[str, Any]] = []

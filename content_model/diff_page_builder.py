@@ -303,6 +303,15 @@ class DiffPageBuilder:
             marks2_str: str = ', '.join(marks2) if marks2 else 'None'
             differences.append(f'<div class="field-property"><span class="property-name">Enabled Marks:</span> <span class="removed">{marks1_str}</span> → <span class="added">{marks2_str}</span></div>')
 
+        # Look for enabledNodeTypes differences
+        node_types1: list[str] = self._extract_enabled_node_types(val1_raw)
+        node_types2: list[str] = self._extract_enabled_node_types(val2_raw)
+
+        if node_types1 != node_types2:
+            node_types1_str: str = ', '.join(node_types1) if node_types1 else 'None'
+            node_types2_str: str = ', '.join(node_types2) if node_types2 else 'None'
+            differences.append(f'<div class="field-property"><span class="property-name">Enabled Node Types:</span> <span class="removed">{node_types1_str}</span> → <span class="added">{node_types2_str}</span></div>')
+
         # Look for linkContentType differences by node type
         node_types_to_check = ['embedded-entry-block', 'embedded-entry-inline', 'entry-hyperlink']
         for node_type in node_types_to_check:
@@ -363,7 +372,7 @@ class DiffPageBuilder:
         
         for validation in val1_raw:
             for key, value in validation.items():
-                if key not in ['enabledMarks', 'linkContentType', 'nodes', 'enabledNodeTypes']:  # Skip already handled validations
+                if key not in ['enabledMarks', 'enabledNodeTypes', 'linkContentType', 'nodes', 'message']:  # Skip already handled validations
                     val1_types.add(key)
                     if key == 'in' and isinstance(value, list):
                         val1_details[key] = ', '.join(value)
@@ -372,7 +381,7 @@ class DiffPageBuilder:
         
         for validation in val2_raw:
             for key, value in validation.items():
-                if key not in ['enabledMarks', 'linkContentType', 'nodes', 'enabledNodeTypes']:  # Skip already handled validations
+                if key not in ['enabledMarks', 'enabledNodeTypes', 'linkContentType', 'nodes', 'message']:  # Skip already handled validations
                     val2_types.add(key)
                     if key == 'in' and isinstance(value, list):
                         val2_details[key] = ', '.join(value)
@@ -402,6 +411,14 @@ class DiffPageBuilder:
             if 'enabledMarks' in validation:
                 enabled_marks: list[str] = validation['enabledMarks']
                 return enabled_marks
+        return []
+
+    def _extract_enabled_node_types(self, validations: list[dict[str, str | list[str]]]) -> list[str]:
+        """Extract enabledNodeTypes from validations."""
+        for validation in validations:
+            if 'enabledNodeTypes' in validation:
+                enabled_node_types: list[str] = validation['enabledNodeTypes']
+                return enabled_node_types
         return []
 
     def _extract_link_content_types(self, validations: list[dict[str, str | list[str]]]) -> list[str]:
