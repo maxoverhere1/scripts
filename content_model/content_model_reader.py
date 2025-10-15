@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 class ContentfulModelReader:
 
     def __init__(self, space_id_env: str, environment_id_env: str):
-        load_dotenv('.contentful.env')
+        load_dotenv('.env')
         self.space_id = os.getenv(space_id_env)
         self.environment_id = os.getenv(environment_id_env)
         self.management_token = os.getenv('CONTENTFUL_MANAGEMENT_TOKEN')

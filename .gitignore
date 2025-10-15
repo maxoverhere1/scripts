@@ -43,7 +43,6 @@ logs/
 .env.staging
 secrets.json
 api_keys.txt
-content_model/.contentful.env
 
 # Generated files and outputs
 content_model/generated/
