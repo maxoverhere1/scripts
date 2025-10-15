@@ -57,3 +57,23 @@ Content-Type: application/vnd.contentful.management.v1+json
 DELETE {{base_url}}/spaces/{{space_id}}/webhook_definitions/WEBHOOK_ID
 Authorization: Bearer {{management_token}}
 Content-Type: application/vnd.contentful.management.v1+json
+
+### 6. Get release details
+GET {{base_url}}/spaces/{{space_id}}/environments/{{environment}}/releases/{{release_id}}
+Authorization: Bearer {{management_token}}
+Content-Type: application/vnd.contentful.management.v1+json
+
+### 7. Get all entries in the release
+GET {{base_url}}/spaces/{{space_id}}/environments/{{environment}}/releases/{{release_id}}/entries
+Authorization: Bearer {{management_token}}
+Content-Type: application/vnd.contentful.management.v1+json
+
+### 8. Get all assets in the release
+GET {{base_url}}/spaces/{{space_id}}/environments/{{environment}}/releases/{{release_id}}/assets
+Authorization: Bearer {{management_token}}
+Content-Type: application/vnd.contentful.management.v1+json
+
+### 9. Get release actions (history/timeline)
+GET {{base_url}}/spaces/{{space_id}}/environments/{{environment}}/releases/{{release_id}}/actions
+Authorization: Bearer {{management_token}}
+Content-Type: application/vnd.contentful.management.v1+json
